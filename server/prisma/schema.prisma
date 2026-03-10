@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  user_id       Int            @id @default(autoincrement())
+  user_name     String         @unique
+  password      String
+  first_name    String
+  last_name     String
+  email         String         @unique
+  phone_no      String
+  role          String
+  notifications Notification[]
+}
+
+model Lawyer {
+  lawyer_id      Int          @id @default(autoincrement())
+  lawyer_name    String
+  specialization String
+  qualification  String
+  email          String       @unique
+  phone_no       String
+  contact        String
+  case_count     Int          @default(0)
+  assignments    Assignment[]
+  cases          Case[]       @relation("LawyerCases")
+}
+
+model Client {
+  client_id   Int    @id @default(autoincrement())
+  client_name String
+  address     String
+  phone_no    String
+  email       String @unique
+  password    String
+  cases       Case[]
+}
+
+model Case {
+  case_id     Int          @id @default(autoincrement())
+  title       String
+  filing_date DateTime
+  type        String
+  status      String
+  client      Client       @relation(fields: [client_id], references: [client_id])
+  client_id   Int
+  lawyer      Lawyer?      @relation("LawyerCases", fields: [lawyer_id], references: [lawyer_id])
+  lawyer_id   Int?
+  documents   Document[]
+  hearings    Hearing[]
+  report      Report?
+  assignments Assignment[]
+}
+
+model Document {
+  doc_id    Int    @id @default(autoincrement())
+  file_path String
+  doc_type  String
+  case      Case   @relation(fields: [case_id], references: [case_id])
+  case_id   Int
+}
+
+model Hearing {
+  hearing_id   Int      @id @default(autoincrement())
+  case         Case     @relation(fields: [case_id], references: [case_id])
+  case_id      Int
+  judge        Judge    @relation(fields: [judge_id], references: [judge_id])
+  judge_id     Int
+  hearing_date DateTime
+  outcome      String
+  notes        String?
+}
+
+model Judge {
+  judge_id      Int       @id @default(autoincrement())
+  judge_name    String
+  qualification String
+  email         String    @unique
+  phone_no      String
+  hearings      Hearing[]
+}
+
+model Report {
+  report_id Int    @id @default(autoincrement())
+  case      Case   @relation(fields: [case_id], references: [case_id])
+  case_id   Int    @unique
+  summary   String
+}
+
+model Assignment {
+  assignment_id Int      @id @default(autoincrement())
+  lawyer        Lawyer   @relation(fields: [lawyer_id], references: [lawyer_id])
+  lawyer_id     Int
+  case          Case     @relation(fields: [case_id], references: [case_id])
+  case_id       Int
+  assigned_at   DateTime @default(now())
+}
+
+model Notification {
+  notification_id Int      @id @default(autoincrement())
+  message         String
+  created_at      DateTime @default(now())
+  user            User     @relation(fields: [user_id], references: [user_id])
+  user_id         Int
+}
