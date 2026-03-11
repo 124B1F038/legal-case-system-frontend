@@ -1,4 +1,4 @@
-export const BASE_URL = "http://localhost:4000";
+export const BASE_URL = "https://legal-case-system-frontend-3.onrender.com";
 const API_URL = `${BASE_URL}/api`;
 
 async function checkResponse(response) {
